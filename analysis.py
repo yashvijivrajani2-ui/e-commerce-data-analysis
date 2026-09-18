@@ -97,6 +97,130 @@ print(clean_df["Country"].value_counts())
 
 clean_df.to_csv("clean_ecommerce_data.csv", index=False)
 
+clean_df["sales"]=clean_df["Quantity"]*clean_df["UnitPrice"]
+print("sales column")
+print(clean_df[["Quantity", "UnitPrice", "sales"]].head())
+
+print("important statistics")
+print("Total sales:", clean_df["sales"].sum())
+print("average sales:", clean_df["sales"].mean())
+print("Total quantity sold:", clean_df["Quantity"].sum())
+print("maximum sales:", clean_df["sales"].max())
+print("minimum sales:", clean_df["sales"].min())
+
+print("monthly sales trends:")
+clean_df["Month"] = clean_df["InvoiceDate"].dt.to_period("M")
+
+monthly_sales = clean_df.groupby("Month")["sales"].sum()
+
+print(monthly_sales)
+
+plt.figure(figsize=(12, 6))
+monthly_sales.plot()
+
+plt.title("Monthly Sales Trend")
+plt.xlabel("Month")
+plt.ylabel("sales")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+country_sales = (
+    clean_df.groupby("Country")["sales"]
+    .sum()
+    .sort_values(ascending=False)
+)
+
+print(country_sales.head(10))
+
+plt.figure(figsize=(10, 6))
+country_sales.head(10).sort_values().plot(kind="barh")
+
+plt.title("Top 10 Countries by Sales")
+plt.xlabel("Sales")
+plt.ylabel("Country")
+plt.tight_layout()
+plt.show()
+
+# top 10 products by quantity
+product_quantity = (
+    clean_df.groupby("Description")["Quantity"]
+    .sum()
+    .sort_values(ascending=False)
+)
+
+print(product_quantity.head(10))
+
+plt.figure(figsize=(10, 6))
+product_quantity.head(10).sort_values().plot(kind="barh")
+
+plt.title("Top 10 Products by Quantity Sold")
+plt.xlabel("Quantity Sold")
+plt.ylabel("Product")
+plt.tight_layout()
+plt.show()
+
+# top 10 products by sales
+product_sales = (
+    clean_df.groupby("Description")["sales"]
+    .sum()
+    .sort_values(ascending=False)
+)
+
+print(product_sales.head(10))
+
+plt.figure(figsize=(10, 6))
+product_sales.head(10).sort_values().plot(kind="barh")
+
+plt.title("Top 10 Products by Sales")
+plt.xlabel("Sales")
+plt.ylabel("Product")
+plt.tight_layout()
+plt.show()
+
+customer_sales = (
+    clean_df.dropna(subset=["CustomerID"])
+    .groupby("CustomerID")["sales"]
+    .sum()
+    .sort_values(ascending=False)
+)
+
+print(customer_sales.head(10))
+
+plt.figure(figsize=(10, 6))
+customer_sales.head(10).sort_values().plot(kind="barh")
+
+plt.title("Top 10 Customers by Sales")
+plt.xlabel("Sales")
+plt.ylabel("Customer ID")
+plt.tight_layout()
+plt.show()
+
+print("\nRecords with highest quantities:")
+print(
+    clean_df.nlargest(10, "Quantity")
+    [["InvoiceNo", "Description", "Quantity", "UnitPrice"]]
+)
+
+print("\nRecords with highest sales:")
+print(
+    clean_df.nlargest(10, "sales")
+    [["InvoiceNo", "Description", "Quantity", "UnitPrice", "sales"]]
+)
+
+cancelled = clean_df[
+    clean_df["InvoiceNo"].astype(str).str.startswith("C")
+]
+
+print("Number of C-prefixed records:")
+print(len(cancelled))
+
+print("\nTotal quantity:")
+print(cancelled["Quantity"].sum())
+
+print("\nTotal sales value:")
+print(cancelled["sales"].sum())
+
 import os
 
 clean_df.to_csv("clean_ecommerce_data.csv", index=False)
